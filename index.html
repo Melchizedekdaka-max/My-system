@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#176b87">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My System">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Personal System Tracker</title>
+<style>
+:root{--bg:#f1f4f6;--card:#fff;--ink:#14202b;--mut:#5a6978;--line:#dce3e9;--acc:#176b87;--S:#6d5bd0;--F:#c98a00;--B:#176b87;--H:#2f9a5d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f151b;--card:#182029;--ink:#e8eef3;--mut:#93a2b1;--line:#2a3643;--acc:#4fb3d1;--S:#9a8cf0;--F:#e3ad2c;--B:#4fb3d1;--H:#52c283;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f151b;--card:#182029;--ink:#e8eef3;--mut:#93a2b1;--line:#2a3643;--acc:#4fb3d1;--S:#9a8cf0;--F:#e3ad2c;--B:#4fb3d1;--H:#52c283;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+main{max-width:640px;margin:0 auto;padding:14px}
+h1,h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0}
+h1{font-size:22px}h2{font-size:17px;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}
+.mut{color:var(--mut);font-size:13px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ring b{width:64px;height:64px;border-radius:50%;background:var(--card);display:grid;place-items:center;font:700 20px "Bricolage Grotesque",system-ui,sans-serif}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;flex:1}.bar i{display:block;height:100%;border-radius:6px}
+.pl{display:grid;grid-template-columns:110px 1fr 38px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.it{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.it:last-child{border:0}.it input{width:22px;height:22px;margin-top:1px;flex:none;accent-color:var(--acc)}
+.it .t{font-size:12px;color:var(--mut);min-width:84px;font-variant-numeric:tabular-nums;padding-top:3px}
+.it.done .x{text-decoration:line-through;color:var(--mut)}
+.it.now{background:color-mix(in srgb,var(--acc) 12%,transparent);border-radius:8px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.w{overflow-x:auto}
+input[type=number],input[type=date],textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
+label.f{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;border:0;padding:10px 4px;font-size:14px;color:var(--mut);border-radius:10px}
+nav button.on{color:var(--acc);font-weight:700;background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wk button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 2px;text-align:center;cursor:pointer;font-size:12px}
+.wk button.sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.wk .col{height:54px;display:flex;align-items:flex-end;margin:4px 6px}.wk .col i{display:block;width:100%;background:var(--acc);border-radius:4px 4px 0 0}
+</style></head><body><main id="app"></main>
+<nav id="nav"></nav>
+<script>
+const PN={S:'Spiritual',F:'Family & friends',B:'Business & finance',H:'Physical health'};
+const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const GYM=['800 m road jog/run','light stretch (no gym planned)','full body + aerobics','rest','chest + abs','arms + abs','legs + back'];
+const CHESS={1:'tactics YouTube learning (15:00–15:30)',2:'study session (set your focus)',4:'watch top chess analysis videos',5:'play one competitive game'};
+const wk=[['04:00','04:30','Wake up and pray','S'],['04:30','05:00','Read the Bible','S'],['05:00','05:30','Travel to gym','H'],['05:30','06:30','Workout','H'],['06:30','07:00','Office preparations','B'],['07:00','07:30','Travel to office','B'],['07:30','08:00','Free social time','F'],['08:00','09:00','Bible study','S'],['09:00','12:00','Profit maximisation and expense review (phones handled by secretary)','B'],['12:00','13:00','Give business direction for the day','B'],['13:00','14:30','Calls, mails, meetings and A.O.B.','B'],['14:30','15:00','Business book reading','B'],['15:00','16:00','Chess','H'],['16:00','17:00','Bible study','S'],['17:00','18:00','Business productivity review','B'],['18:00','19:00','Travel home','B'],['19:00','19:30','Take a bath','H'],['19:30','20:00','Call 2 family members and 2 friends','F'],['20:00','21:00','Family dinner','F'],['21:00','21:30','Children do chores; high table meeting','F'],['21:30','22:00','Bible reading and prayer','S'],['22:00','04:00','Sleep (lights out)','H']];
+const sat=[['05:00','06:00','Prayer and Bible reading','S'],['06:00','07:00','Prepare for office','B'],['07:00','08:00','Travel to office','B'],['08:00','09:00','Inter-branch weekly review meeting','B'],['09:00','10:00','Travel to church','S'],['10:00','14:00','Church witnessing','S'],['14:00','15:00','Travel home','F'],['15:00','15:30','Bath and settle','H'],['15:30','16:00','Business book reading','B'],['16:00','21:00','Family time','F']];
+const sun=[['09:00','10:00','Church preparations','S'],['10:00','11:00','Bible study','S'],['11:00','12:00','Travel to church','S'],['12:00','18:00','Church service','S'],['18:00','19:00','Travel home','F'],['19:00','19:30','Settle in','F'],['19:30','20:00','Business book reading','B'],['20:00','21:00','Dinner','F'],['21:00','21:30','Children do chores; high table meeting','F'],['21:30','22:00','Bible study, pray and sleep','S']];
+const wed=[['09:30','10:00','Wake up and shower','H'],['10:00','11:00','Bible reading','S'],['11:00','11:30','Prayer','S'],['11:30','12:00','Church system review','S'],['12:00','13:00','Travel to church','S'],['13:00','17:00','Wednesday meeting','S'],['17:00','18:00','Travel home','F'],['18:00','18:30','Shower and settle','H'],['18:30','19:00','Business book reading','B'],['19:00','20:00','Review church structure','S'],['20:00','21:00','Family Bible study','F'],['21:00','21:30','Children to bed; high table meeting','F'],['21:30','22:00','Bible study, prayer for breaking the fast, sleep','S']];
+const fuelW=['Drink 1 litre of water (04:30–09:00)','2 cups of dry lemon tea (09:00–12:00)','Low-carb, low-fat meal (12:00–13:00)','Lemon tea (16:00–17:00)','Black tea (17:00–18:00)'];
+const fuelS=['Drink 1 litre of water (05:00–09:00)','Lemon tea (09:00–09:30)','After church: eat freely with family'];
+const BUD=[['Rent',6500,40],['Monthly groceries',5000,25],['Upkeep (family)',6500,15],['Tithe',0,10],['Transport',2500,8],['Electricity and entertainment',1000,2]];
+let S={days:{},rev:{},bible:{},cfg:{need:21500,rate:3,days:30,inc:21500}};
+try{const L=JSON.parse(localStorage.getItem('ps1')||'{}');S=Object.assign(S,L);S.cfg=Object.assign({need:21500,rate:3,days:30,inc:21500},L.cfg)}catch(e){}
+const save=()=>{try{localStorage.setItem('ps1',JSON.stringify(S))}catch(e){}};
+const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const add=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return fmt(d)};
+const mon=s=>add(s,-((parse(s).getDay()+6)%7));
+const K=n=>'K'+Math.round(n).toLocaleString('en-US');
+const today=fmt(new Date());let cur=today,tab='today';
+function items(ds){const d=parse(ds).getDay();let B,H=[];
+ if([1,2,4,5].includes(d)){B=wk.map(x=>x.slice());B[3][2]='Workout: '+GYM[d];B[12][2]='Chess: '+CHESS[d];H=fuelW.map(t=>[t,'H'])}
+ else if(d==6){B=sat;H=[['Gym: legs + back workout','H'],['Chess: one-hour recap','H']].concat(fuelS.map(t=>[t,'H']))}
+ else if(d==0){B=sun;H=[['Wet fast kept (water only)','S'],['Road jog/run: 800 m','H']]}
+ else{B=wed;H=[['Wet fast kept (water only)','S']]}
+ if([0,3,6].includes(d))H.push(['Call 2 family members and 2 friends, share the gospel','F']);
+ return B.map((b,i)=>({id:'b'+i,s:b[0],e:b[1],l:b[2],p:b[3]})).concat(H.map((h,i)=>({id:'h'+i,l:h[0],p:h[1],h:1})))}
+function sc(ds){const c=(S.days[ds]||{}).c||{},r={all:[0,0],S:[0,0],F:[0,0],B:[0,0],H:[0,0]};items(ds).forEach(x=>{const v=c[x.id]?1:0;r[x.p][0]+=v;r[x.p][1]++;r.all[0]+=v;r.all[1]++});return r}
+const pc=a=>a[1]?Math.round(a[0]/a[1]*100):0;
+function streak(){let n=0,d=today;if(pc(sc(d).all)<70)d=add(d,-1);while(pc(sc(d).all)>=70&&n<400){n++;d=add(d,-1)}return n}
+const pb=(p,v)=>`<div class="pl"><span>${PN[p]}</span><span class="bar"><i style="width:${v}%;background:var(--${p})"></i></span><b>${v}%</b></div>`;
+function vToday(){const it=items(cur),c=(S.days[cur]||{}).c||{},r=sc(cur),d=parse(cur),a=pc(r.all);
+ const nw=new Date(),hm=String(nw.getHours()).padStart(2,'0')+':'+String(nw.getMinutes()).padStart(2,'0');
+ const now=x=>cur==today&&x.s&&(x.e>x.s?hm>=x.s&&hm<x.e:hm>=x.s||hm<x.e);
+ const row=x=>`<label class="it ${c[x.id]?'done':''} ${now(x)?'now':''}"><input type="checkbox" data-id="${x.id}" ${c[x.id]?'checked':''}><span class="t">${x.s?x.s+'–'+x.e:''}</span><span class="x" style="flex:1">${x.l}</span><span class="dot" style="background:var(--${x.p})"></span></label>`;
+ const fast=[0,3].includes(d.getDay());
+ return `<div class="row sp"><h1>${DN[d.getDay()]}</h1><div class="row"><button class="btn" data-a="d-1">‹</button><button class="btn" data-a="d0">Today</button><button class="btn" data-a="d1">›</button></div></div>
+ <div class="mut" style="margin:2px 0 12px">${d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}${fast?' · Prayer and fasting day':''}</div>
+ <div class="card"><div class="row"><div class="ring" style="background:conic-gradient(var(--acc) ${a}%,var(--line) 0)"><b>${a}%</b></div><div style="flex:1"><div><b>${r.all[0]} of ${r.all[1]}</b> done</div><div class="mut">Streak: ${streak()} day${streak()==1?'':'s'} at 70% or more</div></div></div>${['S','F','B','H'].map(p=>pb(p,pc(r[p]))).join('')}</div>
+ <h2>Timetable</h2><div class="card">${it.filter(x=>!x.h).map(row).join('')}</div>
+ <h2>Daily habits</h2><div class="card">${it.filter(x=>x.h).map(row).join('')||'<div class="mut">No extra habits today.</div>'}</div>
+ <h2>Notes</h2><textarea id="note" rows="3" placeholder="Wins, lessons, what to adjust tomorrow">${(S.days[cur]||{}).n||''}</textarea>`}
+function vWeek(){const m=mon(cur),ds=[...Array(7)].map((_,i)=>add(m,i)),wkd=ds.map(d=>sc(d));
+ const avg=p=>{let a=0,b=0;wkd.forEach(r=>{a+=r[p][0];b+=r[p][1]});return b?Math.round(a/b*100):0};
+ const bk=S.bible[m]||0;
+ return `<h1>Weekly review</h1><div class="mut" style="margin:2px 0 12px">Week of ${parse(m).toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</div>
+ <div class="wk">${ds.map((d,i)=>{const v=pc(wkd[i].all);return `<button data-day="${d}" class="${d==cur?'sel':''}"><div>${DN[parse(d).getDay()].slice(0,3)}</div><div class="col"><i style="height:${v}%"></i></div><b>${v}%</b></button>`}).join('')}</div>
+ <h2>By pillar this week</h2><div class="card">${['S','F','B','H'].map(p=>pb(p,avg(p))).join('')}</div>
+ <h2>Bible books (finish 2 a week)</h2><div class="card"><label class="it"><input type="checkbox" data-bk="1" ${bk>=1?'checked':''}><span class="x">Book 1 finished</span></label><label class="it"><input type="checkbox" data-bk="2" ${bk>=2?'checked':''}><span class="x">Book 2 finished (midweek)</span></label></div>
+ <h2>Weekly questions</h2><div class="card mut">Which pillar scored lowest? What one change fixes it next week? Were Wednesday and Sunday fasts kept, with fasting days used for church system, Bible study and prayer only?</div>`}
+function vMoney(){const c=S.cfg,send=c.need/c.days,tgt=send/(c.rate/100),mo=cur.slice(0,7);
+ const ent=Object.entries(S.rev).filter(([d])=>d.startsWith(mo)).sort();const tot=ent.reduce((a,[,v])=>a+v,0),sent=tot*c.rate/100,p=Math.min(100,Math.round(sent/c.need*100));
+ return `<h1>Money</h1>
+ <h2>Monthly budget</h2><div class="card w"><table><tr><th>Item</th><th class="n">Budget</th></tr>${BUD.filter(b=>b[1]).map(b=>`<tr><td>${b[0]}</td><td class="n">${K(b[1])}</td></tr>`).join('')}<tr><td><b>Grand total</b></td><td class="n"><b>K21,500</b></td></tr></table>
+ <div class="mut" style="margin-top:8px">Upkeep: Mashy K1,500 · Jay K1,000 · Bob’s K1,500 (K1,000 clothes, K500 upkeep) · Mr Daka K2,500</div></div>
+ <h2>Income split</h2><div class="card w"><label class="f">Income received this month (K)</label><input type="number" id="inc" value="${c.inc}"><table style="margin-top:8px"><tr><th>Item</th><th class="n">%</th><th class="n">Amount</th></tr>${BUD.map(b=>`<tr><td>${b[0]}</td><td class="n">${b[2]}%</td><td class="n">${K(c.inc*b[2]/100)}</td></tr>`).join('')}</table></div>
+ <h2>Revenue target</h2><div class="card"><div class="row"><div style="flex:1"><label class="f">Monthly need (K)</label><input type="number" id="need" value="${c.need}"></div><div style="flex:1"><label class="f">Rate (%)</label><input type="number" id="rate" value="${c.rate}"></div><div style="flex:1"><label class="f">Days</label><input type="number" id="dys" value="${c.days}"></div></div>
+ <p style="margin:12px 0 0">Send <b>${K(send)}</b> a day to reach ${K(c.need)}. Daily revenue target: <b>${K(tgt)}</b>.</p><div class="mut">Your notes round this to K700 sent and K24,000 revenue.</div></div>
+ <h2>Log daily revenue</h2><div class="card"><div class="row"><input type="date" id="rd" value="${cur}"><input type="number" id="rv" placeholder="Revenue (K)" value="${S.rev[cur]||''}"></div><button class="btn on" data-a="rev" style="margin-top:10px;width:100%">Save revenue</button>
+ <div style="margin-top:14px"><div class="row sp"><span>Sent to MD account this month</span><b>${K(sent)} / ${K(c.need)}</b></div><div class="bar" style="margin-top:6px"><i style="width:${p}%;background:var(--B)"></i></div><div class="mut" style="margin-top:4px">Revenue logged: ${K(tot)} over ${ent.length} day${ent.length==1?'':'s'}</div></div>
+ ${ent.slice(-7).reverse().map(([d,v])=>`<div class="row sp mut" style="margin-top:6px"><span>${d}</span><span>${K(v)} → ${K(v*c.rate/100)}</span></div>`).join('')}</div>`}
+function vPlan(){const rows=[0,1,2,3,4,5,6].map(d=>`<tr><td><b>${DN[d].slice(0,3)}</b></td><td>${d==0||d==3?'Wet fast':d==6?'Eat freely after church':'Fuel plan'}</td><td>${GYM[d]}</td><td>${CHESS[d]||(d==6?'1 hr recap':'—')}</td></tr>`).join('');
+ return `<h1>The system</h1><div class="mut" style="margin:2px 0 12px">Four pillars, each scored daily.</div>
+ <div class="card">${['S','F','B','H'].map(p=>`<div class="row" style="margin:6px 0"><span class="dot" style="background:var(--${p});margin:0"></span><b>${PN[p]}</b></div>`).join('')}</div>
+ <h2>Weekly structure</h2><div class="card w"><table><tr><th>Day</th><th>Food</th><th>Gym</th><th>Chess</th></tr>${rows}</table></div>
+ <h2>Rules</h2><div class="card mut">Fasting days (Sunday, Wednesday): water only, time given to church system, Bible study and prayer. Phones are handled by the secretary during profit review (09:00–12:00). Open a line with at least 2 family members and 2 friends daily and share the gospel. Score 70% or more to keep your streak.</div>`}
+function draw(){const V={today:vToday,week:vWeek,money:vMoney,plan:vPlan};$('#app').innerHTML=V[tab]();
+ $('#nav').innerHTML=[['today','Today'],['week','Week'],['money','Money'],['plan','System']].map(t=>`<button data-tab="${t[0]}" class="${tab==t[0]?'on':''}">${t[1]}</button>`).join('')}
+function $(s){return document.querySelector(s)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tab],[data-a],[data-day]');if(!t)return;
+ if(t.dataset.tab){tab=t.dataset.tab;draw();scrollTo(0,0)}
+ else if(t.dataset.day){cur=t.dataset.day;tab='today';draw();scrollTo(0,0)}
+ else{const a=t.dataset.a;if(a=='d-1')cur=add(cur,-1);if(a=='d1')cur=add(cur,1);if(a=='d0')cur=today;
+  if(a=='rev'){const d=$('#rd').value,v=parseFloat($('#rv').value);if(d){if(v>=0)S.rev[d]=v;else delete S.rev[d];save();cur=d}}draw()}});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.id){const o=S.days[cur]=S.days[cur]||{c:{}};o.c=o.c||{};if(t.checked)o.c[t.dataset.id]=1;else delete o.c[t.dataset.id];save();draw()}
+ else if(t.dataset.bk){const m=mon(cur),n=+t.dataset.bk;S.bible[m]=t.checked?n:n-1;save();draw()}
+ else if(['inc','need','rate','dys'].includes(t.id)){const k={inc:'inc',need:'need',rate:'rate',dys:'days'}[t.id];S.cfg[k]=Math.max(+t.value||1,1);save();draw()}});
+document.addEventListener('input',e=>{if(e.target.id=='note'){const o=S.days[cur]=S.days[cur]||{c:{}};o.n=e.target.value;save()}});
+draw();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
